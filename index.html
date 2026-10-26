@@ -143,6 +143,13 @@ details summary{cursor:pointer;font-weight:700;padding:4px 0}
 .k-info.f-sheet .r.sm,.k-info.f-s21 .r.sm{font-size:6pt}
 .k-info.f-sheet .blank,.k-info.f-s21 .blank{min-width:0.45in;border-bottom-width:0.6pt}
 
+.k-carton.f-s42 .p{font-size:20pt;max-height:0.7in}
+.k-carton.f-s42 .r{font-size:15pt}
+.k-carton.f-s42 .r.lg{font-size:18pt}
+.k-carton.f-sheet .p,.k-carton.f-s21 .p{font-size:9pt;max-height:0.3in}
+.k-carton.f-sheet .r,.k-carton.f-s21 .r{font-size:7.5pt}
+.k-carton.f-sheet .r.lg,.k-carton.f-s21 .r.lg{font-size:9pt}
+.k-carton.f-s21 .ttl{font-size:6.5pt;letter-spacing:0}
 .outline{border:0.75pt dashed #000;border-radius:0.06in;display:flex;justify-content:center;align-items:center;font-size:9pt}
 </style>
 </head>
@@ -157,6 +164,7 @@ details summary{cursor:pointer;font-weight:700;padding:4px 0}
     <a class="pick" href="#retain"><span><b>Retain Labels</b><span>Drug, batch, expiration and 1–20 grid</span></span><i>›</i></a>
     <a class="pick" href="#wip"><span><b>WIP Labels</b><span>Lot, box count, status, total and initials</span></span><i>›</i></a>
     <a class="pick" href="#release"><span><b>Release Labels</b><span>Like WIP, with release date and status Released</span></span><i>›</i></a>
+    <a class="pick" href="#carton"><span><b>Product &amp; Carton Labels</b><span>For bins of labels: lot, product, initials and date</span></span><i>›</i></a>
     <p class="hint">Every label prints on an Avery 5160 sheet, a 2 × 1 in roll or a 4 × 2 in roll. You choose when you print.</p>
   </div>
 
@@ -198,6 +206,10 @@ details summary{cursor:pointer;font-weight:700;padding:4px 0}
           <label for="rel">Release date</label>
           <input id="rel" type="date">
         </div>
+        <div class="field" data-for="carton">
+          <label for="ldate">Labeled date <small>(today, change if needed)</small></label>
+          <input id="ldate" type="date">
+        </div>
         <div class="field" data-for="retain">
           <label for="exp1">Expiration</label>
           <input id="exp1" type="date">
@@ -225,8 +237,8 @@ details summary{cursor:pointer;font-weight:700;padding:4px 0}
           <input id="exp2" type="date">
         </div>
       </div>
-      <div class="field" data-for="wip release">
-        <label for="init">Your initials <small>(today's date is added automatically)</small></label>
+      <div class="field" data-for="wip release carton">
+        <label for="init">Your initials <small id="initHint">(today's date is added automatically)</small></label>
         <input id="init" autocomplete="off" autocapitalize="characters" maxlength="4" placeholder="e.g. CP" style="text-transform:uppercase">
       </div>
       <div class="field">
@@ -298,7 +310,8 @@ const PRODUCTS = {
 const MODES = {
   retain:  {name:"Retain Labels",  sub:"Drug, batch, expiration and 1–20 grid.", lot:"Batch #", fmt:"sheet"},
   wip:     {name:"WIP Labels",     sub:"Lot, box count, status, total and initials. Title: WIP.", lot:"Lot #", fmt:"s42", title:"WIP"},
-  release: {name:"Release Labels", sub:"Like WIP, with release date. Status prints as Released.", lot:"Lot #", fmt:"s42", title:"RELEASED", status:"Released"}
+  release: {name:"Release Labels", sub:"Like WIP, with release date. Status prints as Released.", lot:"Lot #", fmt:"s42", title:"RELEASED", status:"Released"},
+  carton:  {name:"Product & Carton Labels", sub:"For bins of labels: lot, product, initials and date.", lot:"Lot #", fmt:"s42", title:"PRODUCT & CARTON LABELS"}
 };
 const FMT = {
   sheet:{name:"Avery 5160 sheet", w:2.625, h:1},
@@ -341,7 +354,9 @@ function openMode(m){
   document.querySelectorAll("[data-for]").forEach(el => el.hidden = !el.dataset.for.split(" ").includes(m));
   $("addHint").textContent = m === "retain"
     ? "After adding, the drug and expiration stay filled in for the next batch."
+    : m === "carton" ? "After adding, the product, initials and date stay filled in for the next lot."
     : "After adding, everything stays filled in and the box number goes up, so the next box is quick.";
+  $("initHint").textContent = m === "carton" ? "" : "(today's date is added automatically)";
   list = ls.get(listKey(), []); skip = new Set();
   $("err").hidden = true; qty = 1; $("qOut").textContent = 1;
   renderList(); paintFmt(); preview();
@@ -362,7 +377,7 @@ $("drug").onchange = () => { $("otherWrap").hidden = $("drug").value !== "__othe
 $("status").onchange = () => { $("statusOtherWrap").hidden = $("status").value !== "__other"; if(!$("statusOtherWrap").hidden) $("statusOther").focus(); preview(); };
 $("qMinus").onclick = () => { qty = Math.max(1, qty-1); $("qOut").textContent = qty; };
 $("qPlus").onclick  = () => { qty = Math.min(60, qty+1); $("qOut").textContent = qty; };
-["other","lot","statusOther","rel","exp1","exp2","boxN","boxOf","total","init"].forEach(id => $(id).addEventListener("input", preview));
+["other","lot","statusOther","rel","ldate","exp1","exp2","boxN","boxOf","total","init"].forEach(id => $(id).addEventListener("input", preview));
 /* the two expiration boxes stay in step */
 $("exp1").addEventListener("input", () => { $("exp2").value = $("exp1").value; });
 $("exp2").addEventListener("input", () => { $("exp1").value = $("exp2").value; });
@@ -373,7 +388,8 @@ function readForm(){
   const status = MODES[mode].status || ($("status").value === "__other" ? $("statusOther").value.trim() : $("status").value);
   return { drug, lot: num($("lot").value), status, rel: $("rel").value,
            boxN: num($("boxN").value), boxOf: num($("boxOf").value), total: num($("total").value),
-           exp: mode === "retain" ? $("exp1").value : $("exp2").value,
+           exp: mode === "retain" ? $("exp1").value : mode === "carton" ? "" : $("exp2").value,
+           ldate: $("ldate").value,
            init: $("init").value.toUpperCase().replace(/[^A-Z]/g,"") };
 }
 
@@ -386,17 +402,18 @@ $("add").onclick = () => {
   if(f.lot.length !== 9) return err(`${word} numbers are 9 digits. This one has ${f.lot.length}. Check it and try again.`);
   if(mode === "wip" && !f.status) return err("Choose the status.");
   if(mode === "release" && !f.rel) return err("Pick the release date.");
-  if(mode !== "retain"){
+  if(mode === "wip" || mode === "release"){
     if(!f.boxN || !f.boxOf) return err("Fill in both box numbers, e.g. 1 of 2.");
     if(+f.boxN < 1 || +f.boxN > +f.boxOf) return err(`Box ${f.boxN} of ${f.boxOf} doesn’t add up. The first number can’t be bigger than the second.`);
   }
-  if(!f.exp) return err("Pick the expiration date.");
+  if(mode !== "carton" && !f.exp) return err("Pick the expiration date.");
   if(mode !== "retain" && f.init.length < 2) return err("Enter your initials (2 to 4 letters).");
+  if(mode === "carton" && !f.ldate) return err("Pick the labeled date.");
   if(f.init) ls.set("al-init", f.init);
   if($("drug").value === "__other" && !custom.includes(f.drug)){ custom.push(f.drug); ls.set("al-custom", custom); }
   list.push({...f, qty}); ls.set(listKey(), list);
   qty = 1; $("qOut").textContent = 1;
-  if(mode === "retain"){ $("lot").value = ""; $("lot").focus(); }
+  if(mode === "retain" || mode === "carton"){ $("lot").value = ""; $("lot").focus(); }
   else { if(+f.boxN < +f.boxOf) $("boxN").value = +f.boxN + 1; $("total").value = ""; $("total").focus(); }
   if($("drug").value === "__other"){ fillDrugs(); $("drug").value = f.drug; $("otherWrap").hidden = true; $("other").value = ""; }
   renderList(); paintFmt(); preview();
@@ -407,11 +424,12 @@ function renderList(){
   if(!list.length) box.innerHTML = `<div class="empty">No labels yet. Fill in the label above and tap Add.</div>`;
   else box.innerHTML = list.map((i,n)=>{
     const bits = [`${MODES[mode].lot} ${i.lot}`];
-    if(mode !== "retain") bits.push(`${i.boxN} of ${i.boxOf}`);
+    if(mode === "wip" || mode === "release") bits.push(`${i.boxN} of ${i.boxOf}`);
     if(mode === "wip") bits.push(i.status);
     if(mode === "release") bits.push(`Rel ${fmtD(i.rel)}`);
-    if(mode !== "retain") bits.push(`Total ${i.total ? commas(i.total) : "blank"}`);
-    bits.push(`Exp ${fmtD(i.exp)}`);
+    if(mode === "wip" || mode === "release") bits.push(`Total ${i.total ? commas(i.total) : "blank"}`);
+    if(mode !== "carton") bits.push(`Exp ${fmtD(i.exp)}`);
+    if(mode === "carton") bits.push(fmtD(i.ldate));
     if(mode !== "retain" && i.init) bits.push(i.init);
     return `<div class="item"><span><b>${esc(i.drug)}<span class="badge">× ${i.qty}</span></b><span class="m">${esc(bits.join(" · "))}</span></span><button class="x" data-rm="${n}" aria-label="Remove">Remove</button></div>`;
   }).join("");
@@ -431,6 +449,15 @@ function labelHTML(f, fmt, pos){
   const drug = esc(f.drug || "Drug and strength").replace(/\//g,"/&#8203;"), lot = esc(f.lot || "_________"), exp = esc(fmtD(f.exp) || "__/__/____");
   if(mode === "retain"){
     return `<div class="lab k-ret f-${fmt}"${style}><div class="t"><div class="p">${drug}</div><div><div class="l">${lot}</div><div class="l">Exp: ${exp}</div></div></div>${grid()}</div>`;
+  }
+  if(mode === "carton"){
+    const ini = esc(f.init || "___"), ld = esc(fmtD(f.ldate) || "__/__/____");
+    const rows = fmt === "s42"
+      ? `<div class="r lg"><span>Lot # <b>${lot}</b></span></div>
+         <div class="r"><span>Labeled by: <b>${ini}</b></span><span>Date: <b>${ld}</b></span></div>`
+      : `<div class="r lg"><span>Lot # <b>${lot}</b></span></div>
+         <div class="r"><span>By: <b>${ini}</b></span><span>Date: <b>${ld}</b></span></div>`;
+    return `<div class="lab k-info k-carton f-${fmt}"${style}><div class="ttl">${esc(M.title)}</div><div class="p">${drug}</div>${rows}</div>`;
   }
   const total = f.total ? `<b>${esc(commas(f.total))}</b>` : `<span class="blank">&nbsp;</span>`;
   const box = `<b>${esc(f.boxN||"_")}</b> of <b>${esc(f.boxOf||"_")}</b>`, ini = esc(f.init || "___");
@@ -554,6 +581,7 @@ function showCal(){ Object.keys(FMT).forEach(k=>["x","y"].forEach(a=>{ const v=c
 /* ---------- start ---------- */
 $("init").value = ls.get("al-init", "");
 $("rel").value = todayISO();
+$("ldate").value = todayISO();
 fillDrugs(); calUI(); route();
 })();
 </script>
