@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bin Labels</title>
+<style>@page{size:4in 2in;margin:0}</style>
+<style>
+:root{
+  --bg:#f3f5f6; --surface:#ffffff; --ink:#132026; --muted:#5b6b73; --line:#d6dde1;
+  --accent:#0d6b73; --accent-ink:#ffffff; --accent-soft:#dcefef;
+  --warn:#a4400e; color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0f1719; --surface:#172226; --ink:#e6eef0; --muted:#97a8ae; --line:#2b3a3f;
+  --accent:#4fb8bf; --accent-ink:#06282b; --accent-soft:#163a3d; --warn:#f0a070; color-scheme:dark}}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:17px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:640px;margin:0 auto;padding:12px max(16px,env(safe-area-inset-right)) 40px max(16px,env(safe-area-inset-left));display:grid;gap:16px}
+h1{font-size:24px;margin:4px 0 0}
+.sub{color:var(--muted);margin:2px 0 0;font-size:15px}
+.card{background:var(--surface);border:1.5px solid var(--line);border-radius:16px;padding:16px;display:grid;gap:14px}
+.card h2{margin:0;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.field{display:grid;gap:6px;min-width:0}
+.field label{font-weight:700}
+.field label small{font-weight:400;color:var(--muted)}
+.field input,.field select{height:56px;border:2px solid var(--line);border-radius:12px;background:var(--bg);padding:0 14px;font-size:19px;width:100%;min-width:0}
+.field input:focus,.field select:focus{border-color:var(--accent);outline:0}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.row > *{flex:1 1 150px;min-width:0}
+.boxof{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center}
+.boxof span{font-weight:700;color:var(--muted)}
+.boxof input{text-align:center}
+.qty{display:grid;grid-template-columns:56px 1fr 56px;gap:8px;align-items:center}
+.qty button{height:56px;border-radius:12px;border:2px solid var(--line);background:var(--bg);font-size:26px;font-weight:700}
+.qty output{text-align:center;font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
+.big{height:58px;border-radius:14px;border:0;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:19px;padding:0 20px;width:100%}
+.big.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
+.big:disabled{opacity:.45;cursor:not-allowed}
+.err{color:var(--warn);font-weight:700}
+.hint{color:var(--muted);font-size:14px}
+.items{display:grid;gap:8px}
+.item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--bg);border-radius:12px;padding:12px}
+.item b{display:block;overflow-wrap:anywhere}
+.item .m{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:15px}
+.item .x{border:0;background:transparent;color:var(--warn);font-weight:700;padding:10px}
+.badge{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:6px;padding:2px 8px;font-weight:700;font-size:14px;margin-left:6px}
+details summary{cursor:pointer;font-weight:700;padding:4px 0}
+.nudge{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center}
+.nudge button{height:48px;border-radius:10px;border:2px solid var(--line);background:var(--bg);font-weight:700;padding:0 12px}
+.nudge output{text-align:center;font-variant-numeric:tabular-nums}
+.empty{color:var(--muted);text-align:center;padding:12px}
+.preview{position:relative;overflow:hidden}
+.preview .page{position:absolute;top:2px;transform-origin:top left;box-shadow:0 1px 6px rgba(0,0,0,.25);border-radius:4px}
+
+/* ---------- printed labels (4 x 2 in) ---------- */
+#printRoot{position:absolute;left:-10000px;top:0}
+@media print{
+  html,body{background:#fff !important}
+  .wrap{display:none !important}
+  #printRoot{position:static}
+}
+.page{position:relative;overflow:hidden;background:#fff;color:#000;width:4in;height:2in;break-after:page;page-break-after:always}
+.page:last-child{break-after:auto;page-break-after:auto}
+.lab{position:absolute;left:0;top:0;width:4in;height:2in;padding:0.12in 0.16in;display:flex;flex-direction:column;justify-content:space-between;font-family:Arial,Helvetica,sans-serif;color:#000}
+.lab .ttl{font-size:11pt;font-weight:bold;text-align:center;text-transform:uppercase;letter-spacing:.04em;border-bottom:1pt solid #000;padding-bottom:0.03in}
+.lab .p{font-size:17pt;font-weight:bold;line-height:1.08;max-height:0.52in;overflow:hidden}
+.lab .lot{font-size:15pt}
+.lab .lot b{font-family:Arial,Helvetica,sans-serif}
+.lab .r{display:flex;justify-content:space-between;align-items:baseline;gap:0.1in;font-size:13pt}
+.lab .r b{font-weight:bold}
+.lab .r.sm{font-size:10pt}
+.lab .blank{display:inline-block;min-width:1.1in;border-bottom:1pt solid #000}
+.lab.outline{border:0.75pt dashed #000;border-radius:0.08in;justify-content:center;align-items:center;font-size:12pt;left:0.04in;top:0.04in;width:3.92in;height:1.92in}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="index.html" style="color:var(--accent);font-weight:700;text-decoration:none;padding:6px 0;display:inline-block">‹ All labels</a>
+  <header>
+    <h1>Bin Labels</h1>
+    <p class="sub">4 × 2 in roll labels for bins: drug, lot, box count, status, expiration, total and initials.</p>
+  </header>
+
+  <section class="card" aria-labelledby="h1a">
+    <h2 id="h1a">1 · Fill in the label</h2>
+    <div class="field">
+      <label for="drug">Drug and strength</label>
+      <select id="drug"></select>
+    </div>
+    <div class="field" id="otherWrap" hidden>
+      <label for="other">Type the drug and strength</label>
+      <input id="other" autocomplete="off" placeholder="e.g. Estradiol 30mg">
+      <span class="hint">Saved to the list on this device for next time.</span>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label for="lot">Lot #</label>
+        <input id="lot" class="mono" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="9 digits">
+      </div>
+      <div class="field">
+        <label for="status">Status</label>
+        <select id="status">
+          <option value="">Choose…</option>
+          <option>OQ</option>
+          <option>In-progress</option>
+          <option value="__other">Other (type it)…</option>
+        </select>
+      </div>
+    </div>
+    <div class="field" id="statusOtherWrap" hidden>
+      <label for="statusOther">Type the status</label>
+      <input id="statusOther" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Box <small>(e.g. 1 of 2)</small></label>
+      <div class="boxof">
+        <input id="boxN" inputmode="numeric" pattern="[0-9]*" value="1" aria-label="Box number">
+        <span>of</span>
+        <input id="boxOf" inputmode="numeric" pattern="[0-9]*" value="1" aria-label="Total boxes">
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label for="total">Total <small>(units in this box)</small></label>
+        <input id="total" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="Leave blank to write in">
+      </div>
+      <div class="field">
+        <label for="exp">Expiration</label>
+        <input id="exp" type="date">
+      </div>
+    </div>
+    <div class="field">
+      <label for="init">Your initials <small>(today's date is added automatically)</small></label>
+      <input id="init" autocomplete="off" autocapitalize="characters" maxlength="4" placeholder="e.g. CP" style="text-transform:uppercase">
+    </div>
+    <div class="field">
+      <label>Copies of this label</label>
+      <div class="qty"><button type="button" id="qMinus" aria-label="One less">−</button><output id="qOut">1</output><button type="button" id="qPlus" aria-label="One more">+</button></div>
+    </div>
+    <div class="field">
+      <label>Preview</label>
+      <div class="preview" id="preview"></div>
+    </div>
+    <div class="err" id="err" hidden></div>
+    <button class="big" id="add">Add to print list</button>
+    <span class="hint">After adding, the lot, drug, status, expiration and initials stay filled in and the box number goes up, so the next box is quick.</span>
+  </section>
+
+  <section class="card" aria-labelledby="h2a">
+    <h2 id="h2a">2 · Print list</h2>
+    <div class="items" id="items"></div>
+    <button class="big" id="print">Print</button>
+    <span class="hint">Print to the 4 × 2 roll printer. In the print screen set the label size to 4 × 2 in and Scale 100% (Actual size).</span>
+    <button class="big ghost" id="clear">Clear the print list</button>
+  </section>
+
+  <section class="card">
+    <details>
+      <summary>Printer alignment (only if labels print off-center)</summary>
+      <div style="display:grid;gap:12px;margin-top:12px">
+        <span class="hint">Each tap moves the print 1/32 inch. Saved on this device only.</span>
+        <div class="nudge"><button data-n="x.-1">◀ Left</button><output id="o_x"></output><button data-n="x.1">Right ▶</button></div>
+        <div class="nudge"><button data-n="y.-1">▲ Up</button><output id="o_y"></output><button data-n="y.1">Down ▼</button></div>
+        <button class="big ghost" id="test">Print one test label</button>
+        <b>Saved drugs</b>
+        <span class="hint">Drugs typed under “Other” on this device. Tap Remove to delete one.</span>
+        <div class="items" id="customList"></div>
+      </div>
+    </details>
+  </section>
+</div>
+
+<div id="printRoot"></div>
+
+<script>
+(() => {
+/* Title printed across the top of every label. Leave "" for no title. */
+const TITLE = "";
+
+/* Same drug list as Retain Labels. */
+const PRODUCTS = {
+  "Estradiol": ["Estradiol 6mg","Estradiol 10mg","Estradiol 12.5mg","Estradiol 15mg","Estradiol 18mg","Estradiol 20mg","Estradiol 25mg","Estradiol 37.5mg"],
+  "Testosterone": ["Testosterone 12.5mg","Testosterone 18mg","Testosterone 25mg","Testosterone 37.5mg","Testosterone 50mg","Testosterone 62.5mg","Testosterone 87.5mg","Testosterone 100mg","Testosterone 200mg","Testosterone 303mg"],
+  "Testosterone/Anastrozole": ["Testosterone/Anastrozole 75/4mg (3.2)","Testosterone/Anastrozole 100mg/4mg (3.2)","Testosterone/Anastrozole 100mg/4mg (4.5)"],
+  "Testosterone/Triamcinolone Acetonide": ["Testosterone/Triamcinolone Acetonide 87.5mg/17.5mcg","Testosterone/Triamcinolone Acetonide 100mg/20mcg","Testosterone/Triamcinolone Acetonide 200mg/40mcg"]
+};
+
+const $ = id => document.getElementById(id);
+const ls = {
+  get(k,d){ try{ const v=localStorage.getItem(k); return v==null?d:JSON.parse(v); }catch(e){ return d; } },
+  set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+};
+let list = ls.get("bl-list", []);
+let custom = ls.get("bl-custom", []);
+let cal = ls.get("bl-cal", {x:0,y:0});
+let qty = 1;
+
+const esc = s => String(s??"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = iso => { if(!iso) return ""; const [y,m,d] = iso.split("-"); return `${m}/${d}/${y}`; };
+const num = v => String(v||"").replace(/\D/g,"");
+const today = () => { const d = new Date(); return `${String(d.getMonth()+1).padStart(2,"0")}/${String(d.getDate()).padStart(2,"0")}/${d.getFullYear()}`; };
+const commas = n => n ? Number(n).toLocaleString("en-US") : "";
+
+function fillDrugs(){
+  const sel = $("drug"), keep = sel.value;
+  let html = `<option value="">Choose…</option>`;
+  for(const [fam, items] of Object.entries(PRODUCTS)) html += `<optgroup label="${esc(fam)}">` + items.map(p=>`<option>${esc(p)}</option>`).join("") + `</optgroup>`;
+  if(custom.length) html += `<optgroup label="Saved">` + custom.map(p=>`<option>${esc(p)}</option>`).join("") + `</optgroup>`;
+  html += `<option value="__other">Other (type it)…</option>`;
+  sel.innerHTML = html;
+  if([...sel.options].some(o=>o.value===keep)) sel.value = keep;
+}
+$("drug").onchange = () => { $("otherWrap").hidden = $("drug").value !== "__other"; if(!$("otherWrap").hidden) $("other").focus(); preview(); };
+$("status").onchange = () => { $("statusOtherWrap").hidden = $("status").value !== "__other"; if(!$("statusOtherWrap").hidden) $("statusOther").focus(); preview(); };
+$("qMinus").onclick = () => { qty = Math.max(1, qty-1); $("qOut").textContent = qty; };
+$("qPlus").onclick  = () => { qty = Math.min(50, qty+1); $("qOut").textContent = qty; };
+["other","lot","statusOther","boxN","boxOf","total","exp","init"].forEach(id => $(id).addEventListener("input", preview));
+
+function readForm(){
+  const drugSel = $("drug").value;
+  const drug = drugSel === "__other" ? $("other").value.trim().replace(/\s+/g," ") : drugSel;
+  const status = $("status").value === "__other" ? $("statusOther").value.trim() : $("status").value;
+  return { drug, lot: num($("lot").value), status, boxN: num($("boxN").value), boxOf: num($("boxOf").value),
+           total: num($("total").value), exp: $("exp").value, init: $("init").value.toUpperCase().replace(/[^A-Z]/g,"") };
+}
+
+$("add").onclick = () => {
+  const err = m => { $("err").textContent = m; $("err").hidden = false; };
+  $("err").hidden = true;
+  const f = readForm();
+  if(!f.drug) return err($("drug").value==="__other" ? "Type the drug and strength." : "Choose the drug and strength.");
+  if(!f.lot) return err("Enter the lot number.");
+  if(f.lot.length !== 9) return err(`Lot numbers are 9 digits. This one has ${f.lot.length}. Check it and try again.`);
+  if(!f.status) return err("Choose the status.");
+  if(!f.boxN || !f.boxOf) return err("Fill in both box numbers, e.g. 1 of 2.");
+  if(+f.boxN < 1 || +f.boxN > +f.boxOf) return err(`Box ${f.boxN} of ${f.boxOf} doesn’t add up. The first number can’t be bigger than the second.`);
+  if(!f.exp) return err("Pick the expiration date.");
+  if(f.init.length < 2) return err("Enter your initials (2 to 4 letters).");
+  ls.set("bl-init", f.init);
+  if($("drug").value === "__other" && !custom.includes(f.drug)){ custom.push(f.drug); ls.set("bl-custom", custom); }
+  list.push({...f, qty});
+  ls.set("bl-list", list);
+  // ready for the next box of the same lot
+  if(+f.boxN < +f.boxOf) $("boxN").value = +f.boxN + 1;
+  $("total").value = ""; qty = 1; $("qOut").textContent = 1;
+  if($("drug").value === "__other"){ fillDrugs(); $("drug").value = f.drug; $("otherWrap").hidden = true; $("other").value = ""; }
+  renderList(); preview();
+  $("total").focus();
+};
+
+function labelHTML(f){
+  const total = f.total ? `<b>${esc(commas(f.total))}</b>` : `<span class="blank">&nbsp;</span>`;
+  return `<div class="lab">
+    ${TITLE ? `<div class="ttl">${esc(TITLE)}</div>` : ""}
+    <div class="p">${esc(f.drug || "Drug and strength")}</div>
+    <div class="lot">Lot # <b>${esc(f.lot || "_________")}</b></div>
+    <div class="r"><span><b>${esc(f.boxN||"_")}</b> of <b>${esc(f.boxOf||"_")}</b></span><span>Status: <b>${esc(f.status || "____")}</b></span></div>
+    <div class="r"><span>Exp: <b>${esc(fmt(f.exp) || "__/__/____")}</b></span><span>Total: ${total}</span></div>
+    <div class="r sm"><span>Labeled by: <b>${esc(f.init || "___")}</b></span><span>Date: <b>${esc(today())}</b></span></div>
+  </div>`;
+}
+/* shrink long drug names until they fit two lines */
+function fit(root){
+  root.querySelectorAll(".lab .p").forEach(p => {
+    let size = 17; p.style.fontSize = size+"pt";
+    while(p.scrollHeight > p.clientHeight + 1 && size > 10){ size -= 0.5; p.style.fontSize = size+"pt"; }
+  });
+}
+function preview(){
+  const box = $("preview");
+  box.innerHTML = `<div class="page">${labelHTML(readForm())}</div>`;
+  fit(box);
+  const pg = box.firstElementChild, w = box.clientWidth, full = 384;
+  const s = Math.min(1, (w - 4) / full);
+  pg.style.transform = `scale(${s})`;
+  pg.style.left = Math.max(0, (w - full*s)/2) + "px";
+  box.style.height = (192 * s + 8) + "px";
+}
+window.addEventListener("resize", preview);
+
+function renderList(){
+  const box = $("items");
+  if(!list.length) box.innerHTML = `<div class="empty">No labels yet. Fill in the label above and tap Add.</div>`;
+  else box.innerHTML = list.map((i,n)=>`<div class="item"><span><b>${esc(i.drug)}<span class="badge">× ${i.qty}</span></b><span class="m">Lot ${esc(i.lot)} · ${esc(i.boxN)} of ${esc(i.boxOf)} · ${esc(i.status)} · Total ${esc(i.total ? commas(i.total) : "blank")} · Exp ${esc(fmt(i.exp))} · ${esc(i.init)}</span></span><button class="x" data-rm="${n}" aria-label="Remove">Remove</button></div>`).join("");
+  const count = list.reduce((n,i)=>n+i.qty,0);
+  $("print").disabled = !list.length; $("clear").disabled = !list.length;
+  $("print").textContent = list.length ? `Print ${count} label${count>1?"s":""}` : "Print";
+  $("customList").innerHTML = custom.length ? custom.map((c,n)=>`<div class="item"><span>${esc(c)}</span><button class="x" data-cx="${n}">Remove</button></div>`).join("") : `<span class="hint">None yet.</span>`;
+}
+$("items").onclick = e => { const b = e.target.closest("[data-rm]"); if(!b) return; list.splice(+b.dataset.rm,1); ls.set("bl-list",list); renderList(); };
+$("customList").onclick = e => { const b = e.target.closest("[data-cx]"); if(!b) return; custom.splice(+b.dataset.cx,1); ls.set("bl-custom",custom); fillDrugs(); renderList(); };
+$("clear").onclick = () => { const c=$("clear"); if(c.dataset.sure){ list=[]; ls.set("bl-list",list); delete c.dataset.sure; c.textContent="Clear the print list"; renderList(); } else { c.dataset.sure="1"; c.textContent="Tap again to clear everything"; setTimeout(()=>{ delete c.dataset.sure; c.textContent="Clear the print list"; },3000); } };
+
+function build(test){
+  const shift = `transform:translate(${cal.x/32}in,${cal.y/32}in)`;
+  const root = $("printRoot");
+  if(test){ root.innerHTML = `<div class="page"><div style="${shift};position:absolute;inset:0"><div class="lab outline">4 × 2 test</div></div></div>`; return; }
+  const out = []; list.forEach(i=>{ for(let q=0;q<i.qty;q++) out.push(i); });
+  root.innerHTML = out.map(i=>`<div class="page"><div style="${shift};position:absolute;inset:0">${labelHTML(i)}</div></div>`).join("");
+  fit(root);
+}
+function doPrint(test){ build(test); setTimeout(()=>window.print(), 50); }
+$("print").onclick = () => { if(list.length) doPrint(false); };
+$("test").onclick = () => doPrint(true);
+
+function showCal(){ ["x","y"].forEach(a=>{ const v=cal[a]; $(`o_${a}`).textContent = v===0 ? "centered" : `${Math.abs(v)}/32" ${a==="x"?(v>0?"right":"left"):(v>0?"down":"up")}`; }); }
+document.querySelectorAll("[data-n]").forEach(b => b.onclick = () => { const [a,d] = b.dataset.n.split("."); cal[a] = Math.max(-32, Math.min(32, cal[a] + Number(d))); ls.set("bl-cal", cal); showCal(); });
+
+$("init").value = ls.get("bl-init", "");
+fillDrugs(); renderList(); showCal(); preview();
+})();
+</script>
+</body>
+</html>
