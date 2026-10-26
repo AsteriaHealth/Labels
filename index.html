@@ -4,29 +4,553 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Asteria Labels</title>
+<style id="pageStyle">@page{size:8.5in 11in;margin:0}</style>
 <style>
-:root{--bg:#f3f5f6;--surface:#ffffff;--ink:#132026;--muted:#5b6b73;--line:#d6dde1;--accent:#0d6b73;--accent-soft:#dcefef;color-scheme:light}
-@media (prefers-color-scheme: dark){:root{--bg:#0f1719;--surface:#172226;--ink:#e6eef0;--muted:#97a8ae;--line:#2b3a3f;--accent:#4fb8bf;--accent-soft:#163a3d;color-scheme:dark}}
+:root{
+  --bg:#f3f5f6; --surface:#ffffff; --ink:#132026; --muted:#5b6b73; --line:#d6dde1;
+  --accent:#0d6b73; --accent-ink:#ffffff; --accent-soft:#dcefef; --warn:#a4400e;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0f1719; --surface:#172226; --ink:#e6eef0; --muted:#97a8ae; --line:#2b3a3f;
+  --accent:#4fb8bf; --accent-ink:#06282b; --accent-soft:#163a3d; --warn:#f0a070; color-scheme:dark}}
 *{box-sizing:border-box}
+[hidden]{display:none !important}
 html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font:17px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-.wrap{max-width:560px;margin:0 auto;padding:28px max(16px,env(safe-area-inset-right)) 40px max(16px,env(safe-area-inset-left));display:grid;gap:16px}
-h1{font-size:26px;margin:0}
-p{margin:0;color:var(--muted)}
-a.choice{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:22px 20px;text-decoration:none;color:var(--ink);min-height:110px}
-a.choice:hover,a.choice:focus-visible{border-color:var(--accent);background:var(--accent-soft);outline:0}
-a.choice b{display:block;font-size:22px;color:var(--ink)}
-a.choice span{color:var(--muted);font-size:15px}
-a.choice i{font-style:normal;font-size:30px;color:var(--accent)}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:640px;margin:0 auto;padding:12px max(16px,env(safe-area-inset-right)) 40px max(16px,env(safe-area-inset-left))}
+.screen{display:grid;gap:16px}
+h1{font-size:24px;margin:4px 0 0}
+.sub{color:var(--muted);margin:2px 0 0;font-size:15px}
+.back{color:var(--accent);font-weight:700;text-decoration:none;padding:6px 0;display:inline-block}
+a.pick{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:22px 20px;text-decoration:none;color:var(--ink);min-height:104px}
+a.pick:hover,a.pick:focus-visible{border-color:var(--accent);background:var(--accent-soft);outline:0}
+a.pick b{display:block;font-size:22px;color:var(--ink)}
+a.pick span span{color:var(--muted);font-size:15px}
+a.pick i{font-style:normal;font-size:30px;color:var(--accent)}
+.card{background:var(--surface);border:1.5px solid var(--line);border-radius:16px;padding:16px;display:grid;gap:14px}
+.card h2{margin:0;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.field{display:grid;gap:6px;min-width:0}
+.field > label{font-weight:700}
+.field label small{font-weight:400;color:var(--muted)}
+.field input,.field select{height:56px;border:2px solid var(--line);border-radius:12px;background:var(--bg);padding:0 14px;font-size:19px;width:100%;min-width:0}
+.field input:focus,.field select:focus{border-color:var(--accent);outline:0}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.row > *{flex:1 1 150px;min-width:0}
+.boxof{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center}
+.boxof span{font-weight:700;color:var(--muted)}
+.boxof input{text-align:center}
+.qty{display:grid;grid-template-columns:56px 1fr 56px;gap:8px;align-items:center}
+.qty button{height:56px;border-radius:12px;border:2px solid var(--line);background:var(--bg);font-size:26px;font-weight:700}
+.qty output{text-align:center;font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
+.btn{height:58px;border-radius:14px;border:0;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:19px;padding:0 20px;width:100%}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
+.btn.slim{height:48px;font-size:16px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.err{color:var(--warn);font-weight:700}
+.hint{color:var(--muted);font-size:14px}
+.items{display:grid;gap:8px}
+.item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--bg);border-radius:12px;padding:12px}
+.item b{display:block;overflow-wrap:anywhere}
+.item .m{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:14px}
+.item .x{border:0;background:transparent;color:var(--warn);font-weight:700;padding:10px}
+.badge{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:6px;padding:2px 8px;font-weight:700;font-size:14px;margin-left:6px}
+.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.choice{border:2px solid var(--line);background:var(--bg);border-radius:14px;padding:12px 10px;text-align:left;display:grid;gap:2px;min-width:0}
+.choice b{font-size:16px}
+.choice span{color:var(--muted);font-size:13px}
+.choice[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.spots{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;max-width:300px}
+.spot{height:30px;border-radius:5px;border:1.5px solid var(--line);background:var(--bg);font-size:12px;color:var(--muted)}
+.spot.used{background:repeating-linear-gradient(45deg,var(--line) 0 3px,transparent 3px 7px);color:transparent}
+.spot.fill{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+details summary{cursor:pointer;font-weight:700;padding:4px 0}
+.nudge{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center}
+.nudge button{height:46px;border-radius:10px;border:2px solid var(--line);background:var(--bg);font-weight:700;padding:0 12px}
+.nudge output{text-align:center;font-variant-numeric:tabular-nums}
+.empty{color:var(--muted);text-align:center;padding:12px}
+.preview{position:relative;overflow:hidden}
+.preview .page{position:absolute;top:2px;transform-origin:top left;box-shadow:0 1px 6px rgba(0,0,0,.25);border-radius:4px}
+
+/* ---------------- printed labels ---------------- */
+#printRoot{position:absolute;left:-10000px;top:0}
+@media print{
+  html,body{background:#fff !important}
+  .wrap{display:none !important}
+  #printRoot{position:static}
+}
+.page{position:relative;overflow:hidden;background:#fff;color:#000;break-after:page;page-break-after:always}
+.page:last-child{break-after:auto;page-break-after:auto}
+.page.letter{width:8.5in;height:11in}
+.page.sheet{width:2.625in;height:1in}
+.page.s21{width:2in;height:1in}
+.page.s42{width:4in;height:2in}
+.lab{position:absolute;font-family:Arial,Helvetica,sans-serif;color:#000;overflow:hidden}
+.f-sheet{width:2.625in;height:1in}
+.f-s21{width:2in;height:1in}
+.f-s42{width:4in;height:2in}
+.lab b{font-weight:bold}
+
+/* retain: text + 1-20 grid */
+.k-ret{display:flex;align-items:center}
+.k-ret .t{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between}
+.k-ret .t > *{flex:none}
+.k-ret .p{font-weight:bold;line-height:1.1;overflow:hidden}
+.k-ret table{border-collapse:collapse;flex:none}
+.k-ret td{border:0.6pt solid #000;text-align:center;vertical-align:middle;padding:0;line-height:1}
+.k-ret.f-sheet{padding:0 0.12in 0 0.13in;gap:0.06in}
+.k-ret.f-s21{padding:0 0.08in;gap:0.05in}
+.k-ret.f-sheet .t,.k-ret.f-s21 .t{height:0.76in}
+.k-ret.f-sheet .p{font-size:8pt;max-height:0.36in}
+.k-ret.f-s21 .p{font-size:6.5pt;max-height:0.3in}
+.k-ret.f-sheet .l{font-size:8pt}
+.k-ret.f-s21 .l{font-size:7pt}
+.k-ret.f-sheet td{width:0.17in;height:0.18in;font-size:5.5pt}
+.k-ret.f-s21 td{width:0.15in;height:0.18in;font-size:5pt}
+.k-ret.f-s42{padding:0 0.16in;gap:0.12in}
+.k-ret.f-s42 .t{height:1.6in}
+.k-ret.f-s42 .p{font-size:17pt;max-height:0.9in}
+.k-ret.f-s42 .l{font-size:15pt}
+.k-ret.f-s42 td{width:0.3in;height:0.36in;font-size:10pt;border-width:0.8pt}
+
+/* WIP / Release: stacked info */
+.k-info{display:flex;flex-direction:column;justify-content:space-between}
+.k-info > *{flex:none}
+.k-info .ttl{font-weight:bold;text-align:center;text-transform:uppercase;letter-spacing:.04em;border-bottom:1pt solid #000}
+.k-info .p{font-weight:bold;line-height:1.08;overflow:hidden}
+.k-info .r{display:flex;justify-content:space-between;align-items:baseline;white-space:nowrap}
+.k-info .blank{display:inline-block;border-bottom:1pt solid #000}
+.k-info.f-s42{padding:0.12in 0.16in}
+.k-info.f-s42 .ttl{font-size:15pt;padding-bottom:0.03in}
+.k-info.f-s42 .p{font-size:17pt;max-height:0.52in}
+.k-info.f-s42 .r{font-size:13pt;gap:0.1in}
+.k-info.f-s42 .r.lg{font-size:14pt}
+.k-info.f-s42 .r.sm{font-size:10pt}
+.k-info.f-s42 .blank{min-width:1in}
+.k-info.f-sheet{padding:0.06in 0.13in}
+.k-info.f-s21{padding:0.06in 0.08in}
+.k-info.f-sheet .ttl,.k-info.f-s21 .ttl{font-size:7.5pt;padding-bottom:0.01in;border-bottom-width:0.6pt}
+.k-info.f-sheet .p,.k-info.f-s21 .p{font-size:7.5pt;max-height:0.25in}
+.k-info.f-sheet .r,.k-info.f-s21 .r{font-size:6.5pt;gap:0.05in}
+.k-info.f-sheet .r.lg,.k-info.f-s21 .r.lg{font-size:7pt}
+.k-info.f-sheet .r.sm,.k-info.f-s21 .r.sm{font-size:6pt}
+.k-info.f-sheet .blank,.k-info.f-s21 .blank{min-width:0.45in;border-bottom-width:0.6pt}
+
+.outline{border:0.75pt dashed #000;border-radius:0.06in;display:flex;justify-content:center;align-items:center;font-size:9pt}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Asteria Labels</h1>
-  <p>What are you labeling?</p>
-  <a class="choice" href="retain.html"><span><b>Retain Labels</b><span>Avery 5160 sheets or 2 × 1 in rolls</span></span><i>›</i></a>
-  <a class="choice" href="bin.html"><span><b id="binName">WIP Labels</b><span>4 × 2 in rolls with lot, box count, status and total</span></span><i>›</i></a>
-  <a class="choice" href="release.html"><span><b>Release Labels</b><span>4 × 2 in or 2 × 1 in rolls, status Released</span></span><i>›</i></a>
+
+  <!-- ===== Home ===== -->
+  <div id="home" class="screen" style="padding-top:16px">
+    <h1>Asteria Labels</h1>
+    <p class="sub">What are you labeling?</p>
+    <a class="pick" href="#retain"><span><b>Retain Labels</b><span>Drug, batch, expiration and 1–20 grid</span></span><i>›</i></a>
+    <a class="pick" href="#wip"><span><b>WIP Labels</b><span>Lot, box count, status, total and initials</span></span><i>›</i></a>
+    <a class="pick" href="#release"><span><b>Release Labels</b><span>Like WIP, with release date and status Released</span></span><i>›</i></a>
+    <p class="hint">Every label prints on an Avery 5160 sheet, a 2 × 1 in roll or a 4 × 2 in roll. You choose when you print.</p>
+  </div>
+
+  <!-- ===== Label maker ===== -->
+  <div id="maker" class="screen" hidden>
+    <a class="back" href="#">‹ All labels</a>
+    <header>
+      <h1 id="mTitle"></h1>
+      <p class="sub" id="mSub"></p>
+    </header>
+
+    <section class="card">
+      <h2>1 · Fill in the label</h2>
+      <div class="field">
+        <label for="drug">Drug and strength</label>
+        <select id="drug"></select>
+      </div>
+      <div class="field" id="otherWrap" hidden>
+        <label for="other">Type the drug and strength</label>
+        <input id="other" autocomplete="off" placeholder="e.g. Estradiol 30mg">
+        <span class="hint">Saved to the list on this device for next time.</span>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="lot" id="lotLabel">Lot #</label>
+          <input id="lot" class="mono" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="9 digits">
+        </div>
+        <div class="field" data-for="wip">
+          <label for="status">Status</label>
+          <select id="status">
+            <option value="">Choose…</option>
+            <option>OQ</option>
+            <option>In-progress</option>
+            <option value="__other">Other (type it)…</option>
+          </select>
+        </div>
+        <div class="field" data-for="release">
+          <label for="rel">Release date</label>
+          <input id="rel" type="date">
+        </div>
+        <div class="field" data-for="retain">
+          <label for="exp1">Expiration</label>
+          <input id="exp1" type="date">
+        </div>
+      </div>
+      <div class="field" id="statusOtherWrap" hidden>
+        <label for="statusOther">Type the status</label>
+        <input id="statusOther" autocomplete="off">
+      </div>
+      <div class="field" data-for="wip release">
+        <label>Box <small>(e.g. 1 of 2)</small></label>
+        <div class="boxof">
+          <input id="boxN" inputmode="numeric" pattern="[0-9]*" value="1" aria-label="Box number">
+          <span>of</span>
+          <input id="boxOf" inputmode="numeric" pattern="[0-9]*" value="1" aria-label="Total boxes">
+        </div>
+      </div>
+      <div class="row" data-for="wip release">
+        <div class="field">
+          <label for="total">Total <small>(units in this box)</small></label>
+          <input id="total" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="Blank = write in">
+        </div>
+        <div class="field">
+          <label for="exp2">Expiration</label>
+          <input id="exp2" type="date">
+        </div>
+      </div>
+      <div class="field" data-for="wip release">
+        <label for="init">Your initials <small>(today's date is added automatically)</small></label>
+        <input id="init" autocomplete="off" autocapitalize="characters" maxlength="4" placeholder="e.g. CP" style="text-transform:uppercase">
+      </div>
+      <div class="field">
+        <label>Copies of this label</label>
+        <div class="qty"><button type="button" id="qMinus" aria-label="One less">−</button><output id="qOut">1</output><button type="button" id="qPlus" aria-label="One more">+</button></div>
+      </div>
+      <div class="field">
+        <label>Preview <small id="pvSize"></small></label>
+        <div class="preview" id="preview"></div>
+      </div>
+      <div class="err" id="err" hidden></div>
+      <button class="btn" id="add">Add to print list</button>
+      <span class="hint" id="addHint"></span>
+    </section>
+
+    <section class="card">
+      <h2>2 · Print list</h2>
+      <div class="items" id="items"></div>
+    </section>
+
+    <section class="card">
+      <h2>3 · Print</h2>
+      <div class="field">
+        <label>What's in the printer?</label>
+        <div class="choices">
+          <button class="choice" data-fmt="sheet"><b>Sheet</b><span>Avery 5160, 30 per page</span></button>
+          <button class="choice" data-fmt="s21"><b>2 × 1</b><span>Small roll</span></button>
+          <button class="choice" data-fmt="s42"><b>4 × 2</b><span>Large roll</span></button>
+        </div>
+      </div>
+      <div class="field" id="sheetOpts">
+        <label>Tap every spot that's already used</label>
+        <span class="hint">Striped = used (skipped). Labels fill the open spots left to right, then down.</span>
+        <div class="spots" id="spots"></div>
+        <span class="hint" id="spotHint"></span>
+        <button class="btn ghost slim" id="resetSpots" type="button">Fresh sheet (no used spots)</button>
+      </div>
+      <button class="btn" id="print">Print</button>
+      <span class="hint" id="printHint"></span>
+      <button class="btn ghost" id="clear">Clear the print list</button>
+    </section>
+
+    <section class="card">
+      <details>
+        <summary>Printer alignment (only if labels print off-center)</summary>
+        <div style="display:grid;gap:12px;margin-top:12px">
+          <span class="hint">Each tap moves the print 1/32 inch. Saved on this device only, and used by all label types.</span>
+          <div id="calBox" style="display:grid;gap:12px"></div>
+          <b>Saved drugs</b>
+          <span class="hint">Drugs typed under “Other” on this device. Tap Remove to delete one.</span>
+          <div class="items" id="customList"></div>
+        </div>
+      </details>
+    </section>
+  </div>
 </div>
+
+<div id="printRoot"></div>
+
+<script>
+(() => {
+/* ===== Drug list: edit here to change choices for everyone ===== */
+const PRODUCTS = {
+  "Estradiol": ["Estradiol 6mg","Estradiol 10mg","Estradiol 12.5mg","Estradiol 15mg","Estradiol 18mg","Estradiol 20mg","Estradiol 25mg","Estradiol 37.5mg"],
+  "Testosterone": ["Testosterone 12.5mg","Testosterone 18mg","Testosterone 25mg","Testosterone 37.5mg","Testosterone 50mg","Testosterone 62.5mg","Testosterone 87.5mg","Testosterone 100mg","Testosterone 200mg","Testosterone 303mg"],
+  "Testosterone/Anastrozole": ["Testosterone/Anastrozole 75/4mg (3.2)","Testosterone/Anastrozole 100mg/4mg (3.2)","Testosterone/Anastrozole 100mg/4mg (4.5)"],
+  "Testosterone/Triamcinolone Acetonide": ["Testosterone/Triamcinolone Acetonide 87.5mg/17.5mcg","Testosterone/Triamcinolone Acetonide 100mg/20mcg","Testosterone/Triamcinolone Acetonide 200mg/40mcg"]
+};
+const MODES = {
+  retain:  {name:"Retain Labels",  sub:"Drug, batch, expiration and 1–20 grid.", lot:"Batch #", fmt:"sheet"},
+  wip:     {name:"WIP Labels",     sub:"Lot, box count, status, total and initials. Title: WIP.", lot:"Lot #", fmt:"s42", title:"WIP"},
+  release: {name:"Release Labels", sub:"Like WIP, with release date. Status prints as Released.", lot:"Lot #", fmt:"s42", title:"RELEASED", status:"Released"}
+};
+const FMT = {
+  sheet:{name:"Avery 5160 sheet", w:2.625, h:1},
+  s21:  {name:"2 × 1 in roll",    w:2,     h:1},
+  s42:  {name:"4 × 2 in roll",    w:4,     h:2}
+};
+
+const $ = id => document.getElementById(id);
+const ls = {
+  get(k,d){ try{ const v=localStorage.getItem(k); return v==null?d:JSON.parse(v); }catch(e){ return d; } },
+  set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+};
+const esc = s => String(s??"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtD = iso => { if(!iso) return ""; const [y,m,d] = iso.split("-"); return `${m}/${d}/${y}`; };
+const num = v => String(v||"").replace(/\D/g,"");
+const pad = n => String(n).padStart(2,"0");
+const todayISO = () => { const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
+const today = () => fmtD(todayISO());
+const commas = n => n ? Number(n).toLocaleString("en-US") : "";
+
+let mode = null, qty = 1, skip = new Set(), list = [];
+let custom = ls.get("al-custom", []);
+let cal = Object.assign({sheet:{x:0,y:0}, s21:{x:0,y:0}, s42:{x:0,y:0}}, ls.get("al-cal", {}));
+const listKey = () => `al-list-${mode}`;
+const getFmt = () => ls.get(`al-fmt-${mode}`, MODES[mode].fmt);
+const setFmt = f => ls.set(`al-fmt-${mode}`, f);
+
+/* ---------- screens ---------- */
+function route(){
+  const h = location.hash.replace("#","");
+  if(MODES[h]) openMode(h);
+  else { mode = null; $("home").hidden = false; $("maker").hidden = true; document.title = "Asteria Labels"; }
+  window.scrollTo(0,0);
+}
+function openMode(m){
+  mode = m; const M = MODES[m];
+  $("home").hidden = true; $("maker").hidden = false;
+  document.title = M.name; $("mTitle").textContent = M.name; $("mSub").textContent = M.sub;
+  $("lotLabel").textContent = M.lot;
+  document.querySelectorAll("[data-for]").forEach(el => el.hidden = !el.dataset.for.split(" ").includes(m));
+  $("addHint").textContent = m === "retain"
+    ? "After adding, the drug and expiration stay filled in for the next batch."
+    : "After adding, everything stays filled in and the box number goes up, so the next box is quick.";
+  list = ls.get(listKey(), []); skip = new Set();
+  $("err").hidden = true; qty = 1; $("qOut").textContent = 1;
+  renderList(); paintFmt(); preview();
+}
+window.addEventListener("hashchange", route);
+
+/* ---------- form ---------- */
+function fillDrugs(){
+  const sel = $("drug"), keep = sel.value;
+  let html = `<option value="">Choose…</option>`;
+  for(const [fam, items] of Object.entries(PRODUCTS)) html += `<optgroup label="${esc(fam)}">` + items.map(p=>`<option>${esc(p)}</option>`).join("") + `</optgroup>`;
+  if(custom.length) html += `<optgroup label="Saved">` + custom.map(p=>`<option>${esc(p)}</option>`).join("") + `</optgroup>`;
+  html += `<option value="__other">Other (type it)…</option>`;
+  sel.innerHTML = html;
+  if([...sel.options].some(o=>o.value===keep)) sel.value = keep;
+}
+$("drug").onchange = () => { $("otherWrap").hidden = $("drug").value !== "__other"; if(!$("otherWrap").hidden) $("other").focus(); preview(); };
+$("status").onchange = () => { $("statusOtherWrap").hidden = $("status").value !== "__other"; if(!$("statusOtherWrap").hidden) $("statusOther").focus(); preview(); };
+$("qMinus").onclick = () => { qty = Math.max(1, qty-1); $("qOut").textContent = qty; };
+$("qPlus").onclick  = () => { qty = Math.min(60, qty+1); $("qOut").textContent = qty; };
+["other","lot","statusOther","rel","exp1","exp2","boxN","boxOf","total","init"].forEach(id => $(id).addEventListener("input", preview));
+/* the two expiration boxes stay in step */
+$("exp1").addEventListener("input", () => { $("exp2").value = $("exp1").value; });
+$("exp2").addEventListener("input", () => { $("exp1").value = $("exp2").value; });
+
+function readForm(){
+  const ds = $("drug").value;
+  const drug = ds === "__other" ? $("other").value.trim().replace(/\s+/g," ") : ds;
+  const status = MODES[mode].status || ($("status").value === "__other" ? $("statusOther").value.trim() : $("status").value);
+  return { drug, lot: num($("lot").value), status, rel: $("rel").value,
+           boxN: num($("boxN").value), boxOf: num($("boxOf").value), total: num($("total").value),
+           exp: mode === "retain" ? $("exp1").value : $("exp2").value,
+           init: $("init").value.toUpperCase().replace(/[^A-Z]/g,"") };
+}
+
+$("add").onclick = () => {
+  const err = m => { $("err").textContent = m; $("err").hidden = false; };
+  $("err").hidden = true;
+  const f = readForm(), word = MODES[mode].lot.replace(" #","");
+  if(!f.drug) return err($("drug").value==="__other" ? "Type the drug and strength." : "Choose the drug and strength.");
+  if(!f.lot) return err(`Enter the ${word.toLowerCase()} number.`);
+  if(f.lot.length !== 9) return err(`${word} numbers are 9 digits. This one has ${f.lot.length}. Check it and try again.`);
+  if(mode === "wip" && !f.status) return err("Choose the status.");
+  if(mode === "release" && !f.rel) return err("Pick the release date.");
+  if(mode !== "retain"){
+    if(!f.boxN || !f.boxOf) return err("Fill in both box numbers, e.g. 1 of 2.");
+    if(+f.boxN < 1 || +f.boxN > +f.boxOf) return err(`Box ${f.boxN} of ${f.boxOf} doesn’t add up. The first number can’t be bigger than the second.`);
+  }
+  if(!f.exp) return err("Pick the expiration date.");
+  if(mode !== "retain" && f.init.length < 2) return err("Enter your initials (2 to 4 letters).");
+  if(f.init) ls.set("al-init", f.init);
+  if($("drug").value === "__other" && !custom.includes(f.drug)){ custom.push(f.drug); ls.set("al-custom", custom); }
+  list.push({...f, qty}); ls.set(listKey(), list);
+  qty = 1; $("qOut").textContent = 1;
+  if(mode === "retain"){ $("lot").value = ""; $("lot").focus(); }
+  else { if(+f.boxN < +f.boxOf) $("boxN").value = +f.boxN + 1; $("total").value = ""; $("total").focus(); }
+  if($("drug").value === "__other"){ fillDrugs(); $("drug").value = f.drug; $("otherWrap").hidden = true; $("other").value = ""; }
+  renderList(); paintFmt(); preview();
+};
+
+function renderList(){
+  const box = $("items");
+  if(!list.length) box.innerHTML = `<div class="empty">No labels yet. Fill in the label above and tap Add.</div>`;
+  else box.innerHTML = list.map((i,n)=>{
+    const bits = [`${MODES[mode].lot} ${i.lot}`];
+    if(mode !== "retain") bits.push(`${i.boxN} of ${i.boxOf}`);
+    if(mode === "wip") bits.push(i.status);
+    if(mode === "release") bits.push(`Rel ${fmtD(i.rel)}`);
+    if(mode !== "retain") bits.push(`Total ${i.total ? commas(i.total) : "blank"}`);
+    bits.push(`Exp ${fmtD(i.exp)}`);
+    if(mode !== "retain" && i.init) bits.push(i.init);
+    return `<div class="item"><span><b>${esc(i.drug)}<span class="badge">× ${i.qty}</span></b><span class="m">${esc(bits.join(" · "))}</span></span><button class="x" data-rm="${n}" aria-label="Remove">Remove</button></div>`;
+  }).join("");
+  const count = list.reduce((n,i)=>n+i.qty,0);
+  $("print").disabled = !list.length; $("clear").disabled = !list.length;
+  $("print").textContent = list.length ? `Print ${count} label${count>1?"s":""}` : "Print";
+  $("customList").innerHTML = custom.length ? custom.map((c,n)=>`<div class="item"><span>${esc(c)}</span><button class="x" data-cx="${n}">Remove</button></div>`).join("") : `<span class="hint">None yet.</span>`;
+}
+$("items").onclick = e => { const b = e.target.closest("[data-rm]"); if(!b) return; list.splice(+b.dataset.rm,1); ls.set(listKey(),list); renderList(); paintFmt(); };
+$("customList").onclick = e => { const b = e.target.closest("[data-cx]"); if(!b) return; custom.splice(+b.dataset.cx,1); ls.set("al-custom",custom); fillDrugs(); renderList(); };
+$("clear").onclick = () => { const c=$("clear"); if(c.dataset.sure){ list=[]; ls.set(listKey(),list); delete c.dataset.sure; c.textContent="Clear the print list"; renderList(); paintFmt(); } else { c.dataset.sure="1"; c.textContent="Tap again to clear everything"; setTimeout(()=>{ delete c.dataset.sure; c.textContent="Clear the print list"; },3000); } };
+
+/* ---------- label layouts ---------- */
+function grid(){ let h="<table>",k=1; for(let r=0;r<4;r++){ h+="<tr>"; for(let c=0;c<5;c++) h+=`<td>${k++}</td>`; h+="</tr>"; } return h+"</table>"; }
+function labelHTML(f, fmt, pos){
+  const M = MODES[mode], style = pos ? ` style="left:${pos[0]}in;top:${pos[1]}in"` : ` style="left:0;top:0"`;
+  const drug = esc(f.drug || "Drug and strength").replace(/\//g,"/&#8203;"), lot = esc(f.lot || "_________"), exp = esc(fmtD(f.exp) || "__/__/____");
+  if(mode === "retain"){
+    return `<div class="lab k-ret f-${fmt}"${style}><div class="t"><div class="p">${drug}</div><div><div class="l">${lot}</div><div class="l">Exp: ${exp}</div></div></div>${grid()}</div>`;
+  }
+  const total = f.total ? `<b>${esc(commas(f.total))}</b>` : `<span class="blank">&nbsp;</span>`;
+  const box = `<b>${esc(f.boxN||"_")}</b> of <b>${esc(f.boxOf||"_")}</b>`, ini = esc(f.init || "___");
+  const status = esc(f.status || "____"), rel = esc(fmtD(f.rel) || "__/__/____"), dt = esc(today());
+  let rows;
+  if(fmt === "s42"){
+    rows = mode === "wip"
+      ? `<div class="r lg"><span>Lot # <b>${lot}</b></span></div>
+         <div class="r"><span>${box}</span><span>Status: <b>${status}</b></span></div>
+         <div class="r"><span>Exp: <b>${exp}</b></span><span>Total: ${total}</span></div>
+         <div class="r sm"><span>Labeled by: <b>${ini}</b></span><span>Date: <b>${dt}</b></span></div>`
+      : `<div class="r lg"><span>Lot # <b>${lot}</b></span><span>Status: <b>${status}</b></span></div>
+         <div class="r"><span>${box}</span><span>Total: ${total}</span></div>
+         <div class="r"><span>Exp: <b>${exp}</b></span><span>Release date: <b>${rel}</b></span></div>
+         <div class="r sm"><span>Labeled by: <b>${ini}</b></span><span>Date: <b>${dt}</b></span></div>`;
+  } else {
+    rows = mode === "wip"
+      ? `<div class="r lg"><span>Lot # <b>${lot}</b></span><span>${box}</span></div>
+         <div class="r"><span>Exp: <b>${exp}</b></span><span>Total: ${total}</span></div>
+         <div class="r"><span>Status: <b>${status}</b></span><span></span></div>
+         <div class="r sm"><span>By: <b>${ini}</b></span><span>Date: <b>${dt}</b></span></div>`
+      : `<div class="r lg"><span>Lot # <b>${lot}</b></span><span>${box}</span></div>
+         <div class="r"><span>Exp: <b>${exp}</b></span><span>Total: ${total}</span></div>
+         <div class="r"><span>Released: <b>${rel}</b></span><span>Status: <b>${status}</b></span></div>
+         <div class="r sm"><span>By: <b>${ini}</b></span><span>Date: <b>${dt}</b></span></div>`;
+  }
+  return `<div class="lab k-info f-${fmt}"${style}><div class="ttl">${esc(M.title)}</div><div class="p">${drug}</div>${rows}</div>`;
+}
+/* shrink long drug names until they fit */
+function fit(root){
+  root.querySelectorAll(".lab .p").forEach(p => {
+    p.style.fontSize = "";
+    let fs = parseFloat(getComputedStyle(p).fontSize) * 0.75; const min = fs * 0.6;
+    while((p.scrollHeight > p.clientHeight + 1 || p.scrollWidth > p.clientWidth + 1) && fs > min){ fs -= 0.25; p.style.fontSize = fs + "pt"; }
+  });
+}
+function preview(){
+  if(!mode) return;
+  const fmt = getFmt(), F = FMT[fmt], box = $("preview");
+  $("pvSize").textContent = `(${F.name})`;
+  box.innerHTML = `<div class="page ${fmt}">${labelHTML(readForm(), fmt)}</div>`;
+  fit(box);
+  const pg = box.firstElementChild, w = box.clientWidth, full = F.w*96, zoom = F.w < 3 ? 1.5 : 1;
+  const s = Math.min(zoom, (w - 4) / full);
+  pg.style.transform = `scale(${s})`;
+  pg.style.left = Math.max(0, (w - full*s)/2) + "px";
+  box.style.height = (F.h*96*s + 8) + "px";
+}
+window.addEventListener("resize", preview);
+
+/* ---------- print format ---------- */
+document.querySelectorAll("[data-fmt]").forEach(b => b.onclick = () => { setFmt(b.dataset.fmt); paintFmt(); preview(); });
+$("resetSpots").onclick = () => { skip.clear(); paintFmt(); };
+function paintFmt(){
+  if(!mode) return;
+  const fmt = getFmt(), n = list.reduce((a,i)=>a+i.qty,0);
+  document.querySelectorAll("[data-fmt]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.fmt===fmt)));
+  $("sheetOpts").hidden = fmt !== "sheet";
+  if(fmt === "sheet"){
+    const box = $("spots"); box.innerHTML = ""; let placed = 0;
+    for(let i=1;i<=30;i++){
+      const b = document.createElement("button"); b.className = "spot"; b.textContent = i;
+      if(skip.has(i)) b.classList.add("used"); else if(placed < n){ b.classList.add("fill"); placed++; }
+      b.setAttribute("aria-label", `Spot ${i}, ${skip.has(i) ? "used" : "open"}`);
+      b.onclick = () => { skip.has(i) ? skip.delete(i) : skip.add(i); paintFmt(); };
+      box.appendChild(b);
+    }
+    const room = 30 - skip.size, extra = Math.max(0, n - room);
+    $("spotHint").textContent = (skip.size ? `${skip.size} used spot${skip.size>1?"s":""} skipped. ` : "Fresh sheet. ") + (extra ? `${extra} more go on a new sheet.` : "");
+    $("printHint").textContent = "Office printer. In the print screen set Paper: Letter, Margins: None, Scale: 100% (Actual size).";
+  } else {
+    $("printHint").textContent = `Roll printer. One label per sticker. In the print screen pick the roll printer, label size ${fmt === "s21" ? "2 × 1 in" : "4 × 2 in"}, Scale 100% (Actual size).`;
+  }
+}
+
+/* ---------- printing ---------- */
+const shift = f => `transform:translate(${cal[f].x/32}in,${cal[f].y/32}in)`;
+function expand(){ const out=[]; list.forEach(i=>{ for(let q=0;q<i.qty;q++) out.push(i); }); return out; }
+function build(fmt, test){
+  const root = $("printRoot"), F = FMT[fmt];
+  if(fmt === "sheet"){
+    const c = cal.sheet, pos = s => [(0.1875 + (s%3)*2.75 + c.x/32).toFixed(4), (0.5 + Math.floor(s/3) + c.y/32).toFixed(4)];
+    let html = "";
+    if(test){
+      let pg = ""; for(let s=0;s<30;s++){ const [x,y]=pos(s); pg += `<div class="lab outline f-sheet" style="left:${x}in;top:${y}in">spot ${s+1}</div>`; }
+      html = `<div class="page letter">${pg}</div>`;
+    } else {
+      const labels = expand(); let k = 0, first = true;
+      while(k < labels.length){
+        let pg = "";
+        for(let s=0; s<30 && k<labels.length; s++){ if(first && skip.has(s+1)) continue; pg += labelHTML(labels[k++], "sheet", pos(s)); }
+        html += `<div class="page letter">${pg}</div>`; first = false;
+      }
+    }
+    root.innerHTML = html;
+    $("pageStyle").textContent = "@page{size:8.5in 11in;margin:0}";
+  } else {
+    root.innerHTML = test
+      ? `<div class="page ${fmt}"><div style="${shift(fmt)};position:absolute;inset:0"><div class="lab outline" style="left:0.03in;top:0.03in;width:${F.w-0.06}in;height:${F.h-0.06}in">${F.name} test</div></div></div>`
+      : expand().map(i=>`<div class="page ${fmt}"><div style="${shift(fmt)};position:absolute;inset:0">${labelHTML(i, fmt)}</div></div>`).join("");
+    $("pageStyle").textContent = `@page{size:${F.w}in ${F.h}in;margin:0}`;
+  }
+  fit(root);
+}
+function doPrint(fmt, test){ build(fmt, test); setTimeout(()=>window.print(), 60); }
+$("print").onclick = () => { if(list.length) doPrint(getFmt(), false); };
+
+/* ---------- alignment ---------- */
+function calUI(){
+  $("calBox").innerHTML = Object.entries(FMT).map(([k,F]) => `
+    <b>${F.name}</b>
+    <div class="nudge"><button data-n="${k}.x.-1">◀ Left</button><output id="o_${k}_x"></output><button data-n="${k}.x.1">Right ▶</button></div>
+    <div class="nudge"><button data-n="${k}.y.-1">▲ Up</button><output id="o_${k}_y"></output><button data-n="${k}.y.1">Down ▼</button></div>
+    <button class="btn ghost slim" data-test="${k}">Print ${k==="sheet" ? "alignment test sheet" : "one test label"}</button>`).join("");
+  $("calBox").querySelectorAll("[data-n]").forEach(b => b.onclick = () => { const [k,a,d] = b.dataset.n.split("."); cal[k][a] = Math.max(-32, Math.min(32, cal[k][a] + Number(d))); ls.set("al-cal", cal); showCal(); });
+  $("calBox").querySelectorAll("[data-test]").forEach(b => b.onclick = () => doPrint(b.dataset.test, true));
+  showCal();
+}
+function showCal(){ Object.keys(FMT).forEach(k=>["x","y"].forEach(a=>{ const v=cal[k][a]; $(`o_${k}_${a}`).textContent = v===0 ? "centered" : `${Math.abs(v)}/32" ${a==="x"?(v>0?"right":"left"):(v>0?"down":"up")}`; })); }
+
+/* ---------- start ---------- */
+$("init").value = ls.get("al-init", "");
+$("rel").value = todayISO();
+fillDrugs(); calUI(); route();
+})();
+</script>
 </body>
 </html>
